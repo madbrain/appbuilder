@@ -9,8 +9,8 @@ public class WidgetDefinition extends Widget {
     private List<StringExpr> arguments;
 
     public WidgetDefinition(Span span, Identifier type,
-    		Identifier name, List<StringExpr> arguments) {
-    	super(span);
+            Identifier name, List<StringExpr> arguments) {
+        super(span);
         this.type = type;
         this.name = name;
         this.arguments = arguments;
@@ -24,9 +24,13 @@ public class WidgetDefinition extends Widget {
         return name;
     }
 
-	@Override
-	public void visit(WidgetVisitor visitor) {
-		visitor.visitWidgetDefinition(this);
-	}
+    public List<StringExpr> getArguments() {
+        return arguments;
+    }
+
+    @Override
+    public void visit(WidgetVisitor visitor) {
+        visitor.visitWidgetDefinition(this);
+    }
 
 }

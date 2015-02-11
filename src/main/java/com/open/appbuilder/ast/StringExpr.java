@@ -8,4 +8,8 @@ public class StringExpr {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
 }
