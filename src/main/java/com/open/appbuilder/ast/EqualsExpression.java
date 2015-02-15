@@ -6,6 +6,7 @@ public class EqualsExpression extends Expression {
     private Expression right;
 
     public EqualsExpression(Expression left, Expression right) {
+    	super(left.getSpan().add(right.getSpan()));
         this.left = left;
         this.right = right;
     }

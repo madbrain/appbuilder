@@ -5,6 +5,7 @@ public class VarExpression extends Expression {
     private Identifier name;
 
     public VarExpression(Identifier name) {
+    	super(name.getSpan());
         this.name = name;
     }
 

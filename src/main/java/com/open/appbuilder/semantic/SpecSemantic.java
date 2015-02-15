@@ -1,9 +1,19 @@
 package com.open.appbuilder.semantic;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import com.open.appbuilder.ErrorReporter;
 import com.open.appbuilder.Materializer;
+import com.open.appbuilder.ast.AssignCommand;
+import com.open.appbuilder.ast.BindCommand;
+import com.open.appbuilder.ast.Command;
+import com.open.appbuilder.ast.CommandVisitor;
+import com.open.appbuilder.ast.EntityCommand;
+import com.open.appbuilder.ast.EnumCommand;
+import com.open.appbuilder.ast.Field;
+import com.open.appbuilder.ast.Identifier;
 import com.open.appbuilder.ast.LabelWidget;
 import com.open.appbuilder.ast.Screen;
 import com.open.appbuilder.ast.Span;
@@ -21,6 +31,13 @@ import com.open.appbuilder.model.ScreenModel;
 import com.open.appbuilder.model.WidgetLineModel;
 import com.open.appbuilder.model.WidgetModel;
 import com.open.appbuilder.model.WidgetTypeModel;
+import com.open.appbuilder.type.EntityField;
+import com.open.appbuilder.type.EntityType;
+import com.open.appbuilder.type.EnumElement;
+import com.open.appbuilder.type.EnumType;
+import com.open.appbuilder.type.IntegerType;
+import com.open.appbuilder.type.StringType;
+import com.open.appbuilder.type.Type;
 
 public class SpecSemantic {
 
@@ -34,6 +51,8 @@ public class SpecSemantic {
 
     public ApplicationModel analyse(Spec spec) {
         ApplicationModel model = new ApplicationModel();
+        model.addType("Integer", new IntegerType());
+        model.addType("String", new StringType());
         for (Screen screen : spec.getScreens()) {
             analyseScreen(screen, model);
         }
@@ -50,10 +69,14 @@ public class SpecSemantic {
             for (WidgetLine widgetLine : screen.getWidgetLines()) {
                 analyseWidgetLine(screenModel, widgetLine);
             }
+            Scope scope = new Scope();
+            for (Command command : screen.getCommands()) {
+            	command.visit(new CommandCreation(screenModel, scope, model));
+            }
         }
     }
 
-    private class WidgetCreation implements WidgetVisitor {
+	private class WidgetCreation implements WidgetVisitor {
 
         private ScreenModel screenModel;
         private WidgetLineModel line;
@@ -158,7 +181,70 @@ public class SpecSemantic {
         }
         wc.finishLine();
     }
+    
+    private class CommandCreation implements CommandVisitor {
 
+		private ApplicationModel model;
+
+		public CommandCreation(ScreenModel screenModel, Scope scope, ApplicationModel model) {
+			this.model = model;
+		}
+
+		@Override
+		public void visitEnum(EnumCommand enumCommand) {
+			String enumName = enumCommand.getName().getName();
+			if (model.getType(enumName) != null) {
+				reportError(enumCommand.getName().getSpan(), "type '" + enumName + "' already defined");
+			} else {
+				Map<String, EnumElement> elements = new HashMap<>();
+				for (Identifier enumElement : enumCommand.getElements()) {
+					if (elements.containsKey(enumElement.getName())) {
+						reportError(enumElement.getSpan(), "enum '" + enumName
+								+ "' already contains element '" + enumElement.getName() + "'");
+					} else {
+						elements.put(enumElement.getName(), new EnumElement(enumElement.getName()));
+					}
+				}
+				model.addType(enumName, new EnumType(enumName, elements));
+			}
+		}
+
+		@Override
+		public void visitEntity(EntityCommand entityCommand) {
+			String entityName = entityCommand.getName().getName();
+			if (model.getType(entityName) != null) {
+				reportError(entityCommand.getName().getSpan(), "type '" + entityName + "' already defined");
+			} else {
+				Map<String, EntityField> fields = new HashMap<>();
+				model.addType(entityName, new EntityType(entityName, fields));
+				for (Field entityField : entityCommand.getFields()) {
+					String fieldName = entityField.getName().getName();
+					if (fields.containsKey(fieldName)) {
+						reportError(entityField.getName().getSpan(), "entity '" + entityName
+								+ "' already contains element '" + fieldName + "'");
+					} else {
+						Type fieldType = model.getType(entityField.getType().getName());
+						if (fieldType == null) {
+							reportError(entityField.getType().getSpan(), "unknown type");
+						} else {
+							fields.put(fieldName, new EntityField(fieldName, fieldType));
+						}
+					}
+				}
+			}
+		}
+
+		@Override
+		public void visitAssign(AssignCommand assignCommand) {
+			reportError(assignCommand.getSpan(), "not implemented");
+		}
+
+		@Override
+		public void visitBind(BindCommand bindCommand) {
+			reportError(bindCommand.getSpan(), "not implemented");
+		}
+    }
+    
     private void reportError(Span span, String message) {
         reporter.reportError(span.getStart(), span.getEnd(), message);
     }

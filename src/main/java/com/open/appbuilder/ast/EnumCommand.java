@@ -7,7 +7,8 @@ public class EnumCommand extends Command {
     private Identifier name;
     private List<Identifier> elements;
 
-    public EnumCommand(Identifier name, List<Identifier> elements) {
+    public EnumCommand(Span span, Identifier name, List<Identifier> elements) {
+    	super(span);
         this.name = name;
         this.elements = elements;
     }
@@ -19,5 +20,10 @@ public class EnumCommand extends Command {
     public List<Identifier> getElements() {
         return elements;
     }
+
+	@Override
+	public void visit(CommandVisitor visitor) {
+		visitor.visitEnum(this);
+	}
 
 }

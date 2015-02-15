@@ -230,24 +230,29 @@ public class SpecParser {
     }
 
     private Command parseCommandLine() throws ParseException {
+    	Span span = token.span;
         if (skipIfNext(TokenType.ENUM)) {
             Identifier name = expectIdentifier();
             expect(TokenType.LPAR);
             List<Identifier> elements = parseIdentifierList();
-            expect(TokenType.RPAR);
-            return new EnumCommand(name, elements);
+            span = span.add(expect(TokenType.RPAR));
+            return new EnumCommand(span, name, elements);
         } else if (skipIfNext(TokenType.ENTITY)) {
             Identifier name = expectIdentifier();
             expect(TokenType.LPAR);
             List<Field> fields = parseFields();
-            expect(TokenType.RPAR);
-            return new EntityCommand(name, fields);
+            span = span.add(expect(TokenType.RPAR));
+            return new EntityCommand(span, name, fields);
         } else {
             Expression left = parseExpression();
             if (skipIfNext(TokenType.ASSIGN)) {
-                return new AssignCommand(left, parseExpression());
+            	Expression right = parseExpression();
+            	span = span.add(right.getSpan());
+                return new AssignCommand(span, left, right);
             } else if (skipIfNext(TokenType.BIND)) {
-                return new BindCommand(left, parseExpression());
+            	Expression right = parseExpression();
+            	span = span.add(right.getSpan());
+                return new BindCommand(span, left, right);
             }
             throw unexpected();
         }
@@ -266,7 +271,7 @@ public class SpecParser {
 
     private List<Field> parseFields() throws ParseException {
         List<Field> fields = new ArrayList<>();
-        while (true) {
+        while (!testNext(TokenType.RPAR)) {
             Identifier name = expectIdentifier();
             expect(TokenType.COLON);
             Identifier type = expectIdentifier();
@@ -294,12 +299,14 @@ public class SpecParser {
     private Expression parseUnary() throws ParseException {
         Expression expr = parsePrimary();
         while (skipIfNext(TokenType.DOT)) {
-            expr = new FieldExpression(expr, expectIdentifier());
+        	Identifier ident = expectIdentifier();
+            expr = new FieldExpression(expr.getSpan().add(ident.getSpan()), expr, ident);
         }
         return expr;
     }
 
     private Expression parsePrimary() throws ParseException {
+    	Span span = token.span;
         if (testNext(TokenType.IDENT)) {
             Identifier name = expectIdentifier();
             return new VarExpression(name);
@@ -308,8 +315,8 @@ public class SpecParser {
             Identifier name = expectIdentifier();
             expect(TokenType.LPAR);
             List<Expression> arguments = parseExpressionList(TokenType.RPAR);
-            expect(TokenType.RPAR);
-            return new ObjectExpression(name, arguments);
+            span = span.add(expect(TokenType.RPAR));
+            return new ObjectExpression(span, name, arguments);
         }
         throw unexpected();
     }
@@ -335,16 +342,19 @@ public class SpecParser {
         scanToken();
         return span;
     }
+    
+    private ParseException unexpected(Span span, String message) {
+    	reporter.reportError(span.getStart(), span.getEnd(), message);
+        return new ParseException(message);
+	}
 
     private ParseException unexpected() {
-    	String message = "unexpected token " + token.getDisplay();
-    	reporter.reportError(token.span.getStart(), token.span.getEnd(), message);
-        return new ParseException(message);
+    	return unexpected(token.span, "unexpected token " + token.getDisplay());
     }
 
     private Identifier expectIdentifier() throws ParseException {
         if (token.type != TokenType.IDENT) {
-            throw new RuntimeException("expecting IDENT");
+            unexpected(token.span, "expecting <IDENT>");
         }
         Identifier identifier = new Identifier(token.span, token.value);
         scanToken();
@@ -421,7 +431,8 @@ public class SpecParser {
                         return token(TokenType.BIND);
                     }
                 }
-                throw new RuntimeException("unexpected char '" + ((char) c) + "'");
+                throw unexpected(new Span(tokenStart, position),
+                		"unexpected char '" + ((char) c) + "'");
             }
             if (c == ')') {
                 c = getChar();
@@ -431,7 +442,8 @@ public class SpecParser {
                 ungetChar(c);
                 return token(TokenType.RPAR);
             }
-            throw new ParseException("unexpected char '" + ((char) c) + "'");
+            throw unexpected(new Span(tokenStart, position), 
+            		"unexpected char '" + ((char) c) + "'");
         }
     }
 

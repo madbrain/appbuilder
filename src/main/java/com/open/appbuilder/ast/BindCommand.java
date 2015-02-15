@@ -5,7 +5,8 @@ public class BindCommand extends Command {
     private Expression left;
     private Expression right;
 
-    public BindCommand(Expression left, Expression right) {
+    public BindCommand(Span span, Expression left, Expression right) {
+    	super(span);
         this.left = left;
         this.right = right;
     }
@@ -17,5 +18,10 @@ public class BindCommand extends Command {
     public Expression getRight() {
         return right;
     }
+
+	@Override
+	public void visit(CommandVisitor visitor) {
+		visitor.visitBind(this);
+	}
 
 }
