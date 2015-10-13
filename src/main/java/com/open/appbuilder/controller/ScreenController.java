@@ -2,6 +2,7 @@ package com.open.appbuilder.controller;
 
 import javax.servlet.ServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,11 @@ import com.open.appbuilder.service.ScreenRegistry;
 public class ScreenController {
 
     private ScreenRegistry screenRegistry;
+
+    @Autowired
+    public ScreenController(ScreenRegistry screenRegistry) {
+        this.screenRegistry = screenRegistry;
+    }
 
     @RequestMapping("/screen/{screenName}/**")
     public String screen(@PathVariable String screenName, ServletRequest request) {

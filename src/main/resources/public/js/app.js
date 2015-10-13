@@ -16,16 +16,15 @@ barApp.config(['$routeProvider',
 			});
 }]);
 
-barApp.controller('IngredientListCtrl', function ($log, $uibModal) {
+barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	
 	var self = this;
 	
-  this.ingredients = [
-    {'name': 'Banane', 'unite': 'PIECE', 'tauxAlcool': 0.0, 'origine': 'Martinique', 'coutUnitaire': 0.5 },
-    {'name': 'Limonade', 'unite': 'LITRE', 'tauxAlcool': 0.0, 'origine': '', 'coutUnitaire': 1 },
-    {'name': 'Sel', 'unite': 'PINCEE', 'tauxAlcool': 0.0, 'origine': '', 'coutUnitaire': 0.1 },
-    {'name': 'Ricard', 'unite': 'LITRE', 'tauxAlcool': 45.0, 'origine': 'France', 'coutUnitaire': 30.0 },
-  ];
+  this.ingredients = [];
+  
+  $http.get('/rest/ingredients').then(function(resp) {
+	  self.ingredients = resp.data;
+  });
   
   this.selectedIngredient = null;
   this.selectIngredient = function(ingredient) {
