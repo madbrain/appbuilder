@@ -18,17 +18,20 @@ barApp.config(['$routeProvider',
 
 barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	
-	var self = this;
+  var self = this;
 	
   this.ingredients = [];
-  
-  $http.get('/rest/ingredients').then(function(resp) {
-	  self.ingredients = resp.data;
-  });
   
   this.selectedIngredient = null;
   this.selectIngredient = function(ingredient) {
 	  this.selectedIngredient = ingredient;
+  }
+  
+  this.loadIngredients = function() {
+	  $http.get('/rest/ingredients').then(function(resp) {
+		  self.ingredients = resp.data;
+		  self.selectedIngredient = null;
+	  });
   }
   
   this.addIngredient = function() {
@@ -36,7 +39,7 @@ barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
   }
   
   this.editIngredient = function() {
-	  this.openIngredientModal(false, this.selectedIngredient);
+	  this.openIngredientModal(false, angular.copy(this.selectedIngredient));
   }
   
   this.openIngredientModal = function(isCreateMode, ingredient) {
@@ -52,9 +55,14 @@ barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	    });
 
 	    modalInstance.result.then(function (selectedItem) {
-	    	$log.info('Modal ok with ' + selectedItem);
+	    	$http.post('/rest/ingredients', selectedItem).then(function(resp) {
+	    		$log.info('Save ok ' + selectedItem);
+	    		self.loadIngredients();
+	    	}, function(resp) {
+	    		$log.error('Save error ' + resp);
+	    	});
 	    }, function () {
-	    	$log.info('Modal dismissed at: ' + new Date());
+	    	// $log.info('Modal dismissed at: ' + new Date());
 	    });
   }
   
@@ -62,13 +70,16 @@ barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	  alert("delete ingredient");
   }
   
+  this.loadIngredients();
+  
 });
 
 barApp.controller('IngredientEditCtrl', function ($modalInstance, isCreateMode, ingredient) {
-	this.title = isCreateMode ? "Add Ingredient" : "Edit Ingredient";
+	this.title = isCreateMode ? "Ajouter Ingredient" : "Editer Ingredient";
 	this.ingredient = isCreateMode ? {} : ingredient;
 	
 	this.ok = function () {
+		// TODO: validation
 		$modalInstance.close(this.ingredient);
 	};
 

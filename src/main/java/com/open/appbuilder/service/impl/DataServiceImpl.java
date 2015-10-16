@@ -2,7 +2,6 @@ package com.open.appbuilder.service.impl;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -20,29 +19,26 @@ import com.open.appbuilder.service.Entity;
 public class DataServiceImpl implements DataService {
 
     // TODO: use concurent object
-    private Map<String, List<JSONObject>> elements = new HashMap<>();
+    private Map<String, EntityImpl> elements = new HashMap<>();
 
     @PostConstruct
     protected void initialize() {
-        elements.put("ingredients", Arrays.asList(
-                makeIngredientObject("Banane", "PIECE", 0.0, "Martinique", 0.5),
-                makeIngredientObject("Limonade", "LITRE", 0.0, "", 1),
-                makeIngredientObject("Sel", "PINCEE", 0.0, "", 0.1),
-                makeIngredientObject("Ricard", "LITRE", 45.0, "France", 30.0)));
+        elements.put("ingredients", new EntityImpl(Arrays.asList(
+                makeIngredientObject(0, "Banane", "PIECE", 0.0, "Martinique", 0.5),
+                makeIngredientObject(1, "Limonade", "LITRE", 0.0, "", 1),
+                makeIngredientObject(2, "Sel", "PINCEE", 0.0, "", 0.1),
+                makeIngredientObject(3, "Ricard", "LITRE", 45.0, "France", 30.0))));
     }
 
     @Override
     public Entity getEntity(String entityName) {
-        List<JSONObject> entities = elements.get(entityName);
-        if (entities == null) {
-            return null;
-        }
-        return new EntityImpl(entities);
+        return elements.get(entityName);
     }
 
-    private JSONObject makeIngredientObject(String name, String unite,
+    private JSONObject makeIngredientObject(int id, String name, String unite,
             double tauxAlcool, String origine, double coutUnitaire) {
         JSONObject object = new JSONObject();
+        object.put("@id", id);
         object.put("name", name);
         object.put("unite", unite);
         object.put("tauxAlcool", tauxAlcool);

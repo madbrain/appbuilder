@@ -1,7 +1,9 @@
 package com.open.appbuilder.semantic;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import com.open.appbuilder.ErrorReporter;
@@ -71,12 +73,12 @@ public class SpecSemantic {
             }
             Scope scope = new Scope();
             for (Command command : screen.getCommands()) {
-            	command.visit(new CommandCreation(screenModel, scope, model));
+                command.visit(new CommandCreation(screenModel, scope, model));
             }
         }
     }
 
-	private class WidgetCreation implements WidgetVisitor {
+    private class WidgetCreation implements WidgetVisitor {
 
         private ScreenModel screenModel;
         private WidgetLineModel line;
@@ -181,70 +183,72 @@ public class SpecSemantic {
         }
         wc.finishLine();
     }
-    
+
     private class CommandCreation implements CommandVisitor {
 
-		private ApplicationModel model;
+        private ApplicationModel model;
 
-		public CommandCreation(ScreenModel screenModel, Scope scope, ApplicationModel model) {
-			this.model = model;
-		}
+        public CommandCreation(ScreenModel screenModel, Scope scope, ApplicationModel model) {
+            this.model = model;
+        }
 
-		@Override
-		public void visitEnum(EnumCommand enumCommand) {
-			String enumName = enumCommand.getName().getName();
-			if (model.getType(enumName) != null) {
-				reportError(enumCommand.getName().getSpan(), "type '" + enumName + "' already defined");
-			} else {
-				Map<String, EnumElement> elements = new HashMap<>();
-				for (Identifier enumElement : enumCommand.getElements()) {
-					if (elements.containsKey(enumElement.getName())) {
-						reportError(enumElement.getSpan(), "enum '" + enumName
-								+ "' already contains element '" + enumElement.getName() + "'");
-					} else {
-						elements.put(enumElement.getName(), new EnumElement(enumElement.getName()));
-					}
-				}
-				model.addType(enumName, new EnumType(enumName, elements));
-			}
-		}
+        @Override
+        public void visitEnum(EnumCommand enumCommand) {
+            String enumName = enumCommand.getName().getName();
+            if (model.getType(enumName) != null) {
+                reportError(enumCommand.getName().getSpan(), "type '" + enumName + "' already defined");
+            } else {
+                List<EnumElement> elements = new ArrayList<>();
+                Set<String> enumElementNames = new HashSet<>();
+                for (Identifier enumElement : enumCommand.getElements()) {
+                    if (enumElementNames.contains(enumElement.getName())) {
+                        reportError(enumElement.getSpan(), "enum '" + enumName
+                                + "' already contains element '" + enumElement.getName() + "'");
+                    } else {
+                        elements.add(new EnumElement(enumElement.getName()));
+                    }
+                }
+                model.addType(enumName, new EnumType(enumName, elements));
+            }
+        }
 
-		@Override
-		public void visitEntity(EntityCommand entityCommand) {
-			String entityName = entityCommand.getName().getName();
-			if (model.getType(entityName) != null) {
-				reportError(entityCommand.getName().getSpan(), "type '" + entityName + "' already defined");
-			} else {
-				Map<String, EntityField> fields = new HashMap<>();
-				model.addType(entityName, new EntityType(entityName, fields));
-				for (Field entityField : entityCommand.getFields()) {
-					String fieldName = entityField.getName().getName();
-					if (fields.containsKey(fieldName)) {
-						reportError(entityField.getName().getSpan(), "entity '" + entityName
-								+ "' already contains element '" + fieldName + "'");
-					} else {
-						Type fieldType = model.getType(entityField.getType().getName());
-						if (fieldType == null) {
-							reportError(entityField.getType().getSpan(), "unknown type");
-						} else {
-							fields.put(fieldName, new EntityField(fieldName, fieldType));
-						}
-					}
-				}
-			}
-		}
+        @Override
+        public void visitEntity(EntityCommand entityCommand) {
+            String entityName = entityCommand.getName().getName();
+            if (model.getType(entityName) != null) {
+                reportError(entityCommand.getName().getSpan(), "type '" + entityName + "' already defined");
+            } else {
+                List<EntityField> fields = new ArrayList<>();
+                Set<String> fieldNames = new HashSet<>();
+                model.addType(entityName, new EntityType(entityName, fields));
+                for (Field entityField : entityCommand.getFields()) {
+                    String fieldName = entityField.getName().getName();
+                    if (fieldNames.contains(fieldName)) {
+                        reportError(entityField.getName().getSpan(), "entity '" + entityName
+                                + "' already contains element '" + fieldName + "'");
+                    } else {
+                        Type fieldType = model.getType(entityField.getType().getName());
+                        if (fieldType == null) {
+                            reportError(entityField.getType().getSpan(), "unknown type");
+                        } else {
+                            fields.add(new EntityField(fieldName, fieldType));
+                        }
+                    }
+                }
+            }
+        }
 
-		@Override
-		public void visitAssign(AssignCommand assignCommand) {
-			reportError(assignCommand.getSpan(), "not implemented");
-		}
+        @Override
+        public void visitAssign(AssignCommand assignCommand) {
+            reportError(assignCommand.getSpan(), "not implemented");
+        }
 
-		@Override
-		public void visitBind(BindCommand bindCommand) {
-			reportError(bindCommand.getSpan(), "not implemented");
-		}
+        @Override
+        public void visitBind(BindCommand bindCommand) {
+            reportError(bindCommand.getSpan(), "not implemented");
+        }
     }
-    
+
     private void reportError(Span span, String message) {
         reporter.reportError(span.getStart(), span.getEnd(), message);
     }

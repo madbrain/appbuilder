@@ -1,23 +1,23 @@
 package com.open.appbuilder.type;
 
-import java.util.Map;
+import java.util.List;
 
 public class EntityType extends Type {
 
-	private String name;
-	private Map<String, EntityField> fields;
+    private String name;
+    private List<EntityField> fields;
 
-	public EntityType(String name, Map<String, EntityField> fields) {
-		this.name = name;
-		this.fields = fields;
-	}
+    public EntityType(String name, List<EntityField> fields) {
+        this.name = name;
+        this.fields = fields;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Map<String, EntityField> getFields() {
-		return fields;
-	}
+    public List<EntityField> getFields() {
+        return fields;
+    }
 
 }

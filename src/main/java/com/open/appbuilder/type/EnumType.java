@@ -1,19 +1,19 @@
 package com.open.appbuilder.type;
 
-import java.util.Map;
+import java.util.List;
 
 public class EnumType extends Type {
 
-	private String name;
-	private Map<String, EnumElement> elements;
+    private String name;
+    private List<EnumElement> elements;
 
-	public EnumType(String name, Map<String, EnumElement> elements) {
-		this.name = name;
-		this.elements = elements;
-	}
+    public EnumType(String name, List<EnumElement> elements) {
+        this.name = name;
+        this.elements = elements;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
 }
