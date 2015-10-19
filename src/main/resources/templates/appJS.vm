@@ -1,20 +1,21 @@
+#set ( $d = "$")
 var app = angular.module('app', [ 'ngRoute', 'ui.bootstrap' ]);
 
-app.config(['$routeProvider',
-	function($routeProvider) {
-		$routeProvider.
+app.config(['${d}routeProvider',
+	function(${d}routeProvider) {
+		$routeProvider
 #foreach ($route in $routes.items)
-			when('/${route.url}', {
+			.when('/${route.url}', {
 				templateUrl: 'views/${route.url}.html',
 				controller: '${route.controller} as ${route.controllerVar}'
-			}).
+			})
 #end
-			otherwise({
+			.otherwise({
 				redirectTo: '/${routes.defaultRouteUrl}'
 			});
 }]);
 
-app.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
+app.controller('IngredientListCtrl', function (${d}log, ${d}uibModal, ${d}http) {
 	
   var self = this;
 
@@ -26,22 +27,22 @@ app.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
   }
   
   this.loadIngredients = function() {
-	  $http.get('/rest/ingredients').then(function(resp) {
+	  ${d}http.get('/rest/ingredients').then(function(resp) {
 		  self.ingredients = resp.data;
 		  self.selectedIngredient = null;
 	  });
-  }
+  };
   
   this.addIngredient = function() {
 	  this.openIngredientModal(true, null);
-  }
+  };
   
   this.editIngredient = function() {
 	  this.openIngredientModal(false, angular.copy(this.selectedIngredient));
-  }
+  };
   
   this.openIngredientModal = function(isCreateMode, ingredient) {
-	  var modalInstance = $uibModal.open({
+	  var modalInstance = ${d}uibModal.open({
 	      animation: false,
 	      templateUrl: 'IngredientModalContent.html',
 	      controller: 'IngredientEditCtrl as ingredientEditCtrl',
@@ -53,36 +54,36 @@ app.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	    });
 
 	    modalInstance.result.then(function (selectedItem) {
-	    	$http.post('/rest/ingredients', selectedItem).then(function(resp) {
-	    		$log.info('Save ok ' + selectedItem);
+	    	${d}http.post('/rest/ingredients', selectedItem).then(function(resp) {
+	    		${d}log.info('Save ok ' + selectedItem);
 	    		self.loadIngredients();
 	    	}, function(resp) {
-	    		$log.error('Save error ' + resp);
+	    		${d}log.error('Save error ' + resp);
 	    	});
 	    }, function () {
-	    	// $log.info('Modal dismissed at: ' + new Date());
+	    	// ${d}log.info('Modal dismissed at: ' + new Date());
 	    });
-  }
+  };
   
   this.deleteIngredient = function() {
 	  alert("delete ingredient");
-  }
+  };
   
   this.loadIngredients();
   
 });
 
-app.controller('IngredientEditCtrl', function ($modalInstance, isCreateMode, ingredient) {
+app.controller('IngredientEditCtrl', function (${d}modalInstance, isCreateMode, ingredient) {
 	this.title = isCreateMode ? "Ajouter Ingredient" : "Editer Ingredient";
 	this.ingredient = isCreateMode ? {} : ingredient;
 	
 	this.ok = function () {
 		// TODO: validation
-		$modalInstance.close(this.ingredient);
+		${d}modalInstance.close(this.ingredient);
 	};
 
 	this.cancel = function () {
-		$modalInstance.dismiss('cancel');
+		${d}modalInstance.dismiss('cancel');
 	};
 });
 
