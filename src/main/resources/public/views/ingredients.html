@@ -1,43 +1,43 @@
 <div class="container">
 
-		<div class="row top20">
-			<div class="btn-toolbar" role="toolbar">
-				<div class="btn-group" role="group">
-					<button type="button" class="btn btn-default"
-						ng-click="ingredientListCtrl.addIngredient()">Ajouter</button>
-					<button type="button" class="btn btn-default"
-						ng-click="ingredientListCtrl.editIngredient()"
-						ng-disabled="ingredientListCtrl.selectedIngredient === null">Modifier</button>
-					<button type="button" class="btn btn-default"
-						ng-click="ingredientListCtrl.deleteIngredient()"
-						ng-disabled="ingredientListCtrl.selectedIngredient === null">Supprimer</button>
-				</div>
+	<div class="row top20">
+		<div class="btn-toolbar" role="toolbar">
+			<div class="btn-group" role="group">
+				<button type="button" class="btn btn-default"
+					ng-click="ingredientListCtrl.addIngredient()">Ajouter</button>
+				<button type="button" class="btn btn-default"
+					ng-click="ingredientListCtrl.editIngredient()"
+					ng-disabled="ingredientListCtrl.selectedIngredient === null">Modifier</button>
+				<button type="button" class="btn btn-default"
+					ng-click="ingredientListCtrl.deleteIngredient()"
+					ng-disabled="ingredientListCtrl.selectedIngredient === null">Supprimer</button>
 			</div>
 		</div>
+	</div>
 
-		<div class="row top20">
-			<table class="table table-striped table-hover">
-				<tr>
-					<th>Nom</th>
-					<th>Unité</th>
-					<th>Taux Alcool</th>
-					<th>Origine</th>
-					<th>Coût Unitaire (€)</th>
-				</tr>
-				<tr ng-repeat="ingredient in ingredientListCtrl.ingredients"
-					ng-click="ingredientListCtrl.selectIngredient(ingredient)"
-					ng-class="{info: ingredient === ingredientListCtrl.selectedIngredient}">
-					<td>{{ingredient.name}}</td>
-					<td>{{ingredient.unite}}</td>
-					<td>{{ingredient.tauxAlcool}}</td>
-					<td>{{ingredient.origine}}</td>
-					<td>{{ingredient.coutUnitaire}}</td>
-				</tr>
-			</table>
-		</div>
+	<div class="row top20">
+		<table class="table table-striped table-hover">
+			<tr>
+				<th>Nom</th>
+				<th>Unité</th>
+				<th>Taux Alcool</th>
+				<th>Origine</th>
+				<th>Coût Unitaire (€)</th>
+			</tr>
+			<tr ng-repeat="ingredient in ingredientListCtrl.ingredients"
+				ng-click="ingredientListCtrl.selectIngredient(ingredient)"
+				ng-class="{info: ingredient === ingredientListCtrl.selectedIngredient}">
+				<td>{{ingredient.name}}</td>
+				<td>{{ingredient.unite}}</td>
+				<td>{{ingredient.tauxAlcool}}</td>
+				<td>{{ingredient.origine}}</td>
+				<td>{{ingredient.coutUnitaire}}</td>
+			</tr>
+		</table>
+	</div>
 
-		<!-- Modal -->
-		<script type="text/ng-template" id="IngredientModalContent.html">
+	<!-- Modal -->
+	<script type="text/ng-template" id="IngredientModalContent.html">
 		<div class="modal-header">
             <h3 class="modal-title">{{ingredientEditCtrl.title}}</h3>
         </div>
@@ -70,6 +70,5 @@
             <button class="btn btn-primary" type="button" ng-click="ingredientEditCtrl.ok()">OK</button>
             <button class="btn btn-warning" type="button" ng-click="ingredientEditCtrl.cancel()">Cancel</button>
         </div>
-		</script>
-	</div>
-	<!-- /container -->
+	</script>
+</div>

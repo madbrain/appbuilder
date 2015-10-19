@@ -2,14 +2,12 @@ package com.open.appbuilder.controller;
 
 import java.util.Arrays;
 
-import javax.servlet.ServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.open.appbuilder.model.ScreenModel;
 import com.open.appbuilder.service.ScreenRegistry;
@@ -31,7 +29,7 @@ public class ApplicationResourceController {
                 new MenuItem.Builder().url("ingredients").label("Ingredients").active().build(),
                 new MenuItem.Builder().url("cocktails").label("Cocktails").build()
                 ));
-        return "index";
+        return "index.html";
     }
 
     @RequestMapping("/js/app.js")
@@ -41,13 +39,13 @@ public class ApplicationResourceController {
                 .route("cocktails", "CocktailListCtrl")
                 .defaultRoute("ingredients")
                 .build());
-        return "appJS";
+        return "app.js";
     }
 
-    @RequestMapping("/screen/{screenName}/**")
-    public String screen(@PathVariable String screenName, ServletRequest request) {
-        ScreenModel screenModel = screenRegistry.get(screenName);
-        String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        return "<p>Hello screen " + screenName + "! (" + path + ")</p>";
+    @RequestMapping("/views/{viewName}.html")
+    @ResponseBody
+    public String screen(@PathVariable String viewName) {
+        ScreenModel screenModel = screenRegistry.get(viewName);
+        return "<div class=\"container\">Hello view " + viewName + "!</div>";
     }
 }

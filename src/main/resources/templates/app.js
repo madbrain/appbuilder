@@ -1,25 +1,25 @@
-var barApp = angular.module('barApp', [ 'ngRoute', 'ui.bootstrap' ]);
+var app = angular.module('app', [ 'ngRoute', 'ui.bootstrap' ]);
 
-barApp.config(['$routeProvider',
+app.config(['$routeProvider',
 	function($routeProvider) {
-		$routeProvider.
-			when('/ingredients', {
-				templateUrl: 'views/ingredients.html',
-				controller: 'IngredientListCtrl as ingredientListCtrl'
-			}).
-			when('/cocktails', {
-				templateUrl: 'views/cocktails.html'
-				// controller: 'CocktailListCtrl as cocktailListCtrl'
-			}).
-			otherwise({
-				redirectTo: '/ingredients'
+		$routeProvider
+{{#routes}}
+{{#items}}
+			.when('/{{url}}', {
+				templateUrl: 'views/{{url}}.html',
+				controller: '{{controller}} as {{controllerVar}}'
+			})
+{{/items}}
+			.otherwise({
+				redirectTo: '/{{defaultRouteUrl}}'
 			});
+{{/routes}}
 }]);
 
-barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
+app.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	
   var self = this;
-	
+
   this.ingredients = [];
   
   this.selectedIngredient = null;
@@ -32,15 +32,15 @@ barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 		  self.ingredients = resp.data;
 		  self.selectedIngredient = null;
 	  });
-  }
+  };
   
   this.addIngredient = function() {
 	  this.openIngredientModal(true, null);
-  }
+  };
   
   this.editIngredient = function() {
 	  this.openIngredientModal(false, angular.copy(this.selectedIngredient));
-  }
+  };
   
   this.openIngredientModal = function(isCreateMode, ingredient) {
 	  var modalInstance = $uibModal.open({
@@ -64,17 +64,17 @@ barApp.controller('IngredientListCtrl', function ($log, $uibModal, $http) {
 	    }, function () {
 	    	// $log.info('Modal dismissed at: ' + new Date());
 	    });
-  }
+  };
   
   this.deleteIngredient = function() {
 	  alert("delete ingredient");
-  }
+  };
   
   this.loadIngredients();
   
 });
 
-barApp.controller('IngredientEditCtrl', function ($modalInstance, isCreateMode, ingredient) {
+app.controller('IngredientEditCtrl', function ($modalInstance, isCreateMode, ingredient) {
 	this.title = isCreateMode ? "Ajouter Ingredient" : "Editer Ingredient";
 	this.ingredient = isCreateMode ? {} : ingredient;
 	
@@ -87,3 +87,4 @@ barApp.controller('IngredientEditCtrl', function ($modalInstance, isCreateMode, 
 		$modalInstance.dismiss('cancel');
 	};
 });
+
