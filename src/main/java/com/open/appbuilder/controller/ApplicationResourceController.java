@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.open.appbuilder.model.ScreenModel;
 import com.open.appbuilder.service.ScreenRegistry;
+import com.open.appbuilder.viewbuilder.ButtonBarBuilder;
+import com.open.appbuilder.viewbuilder.ButtonBuilder;
+import com.open.appbuilder.viewbuilder.ContainerBuilder;
+import com.open.appbuilder.viewbuilder.RowBuilder;
 
 @Controller
 public class ApplicationResourceController {
@@ -46,6 +50,18 @@ public class ApplicationResourceController {
     @ResponseBody
     public String screen(@PathVariable String viewName) {
         ScreenModel screenModel = screenRegistry.get(viewName);
-        return "<div class=\"container\">Hello view " + viewName + "!</div>";
+        if (viewName.equals("ingredients")) {
+            StringBuilder builder = new StringBuilder();
+            new ContainerBuilder(new RowBuilder(new ButtonBarBuilder(
+                    new ButtonBuilder("Ajouter", "ingredientListCtrl.addIngredient()", true),
+                    new ButtonBuilder("Modifier", "ingredientListCtrl.editIngredient()",
+                            "ingredientListCtrl.selectedIngredient === null", true),
+                    new ButtonBuilder("Supprimer", "ingredientListCtrl.deleteIngredient()",
+                            "ingredientListCtrl.selectedIngredient === null", true)
+                    ))).build(builder);
+            return builder.toString();
+        } else {
+            return "<div class=\"container\">Hello view " + viewName + "!</div>";
+        }
     }
 }
