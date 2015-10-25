@@ -13,8 +13,12 @@ import com.open.appbuilder.model.ScreenModel;
 import com.open.appbuilder.service.ScreenRegistry;
 import com.open.appbuilder.viewbuilder.ButtonBarBuilder;
 import com.open.appbuilder.viewbuilder.ButtonBuilder;
+import com.open.appbuilder.viewbuilder.ButtonType;
 import com.open.appbuilder.viewbuilder.ContainerBuilder;
+import com.open.appbuilder.viewbuilder.ModalBuilder;
 import com.open.appbuilder.viewbuilder.RowBuilder;
+import com.open.appbuilder.viewbuilder.TableBuilder;
+import com.open.appbuilder.viewbuilder.TableColumnBuilder;
 
 @Controller
 public class ApplicationResourceController {
@@ -52,13 +56,30 @@ public class ApplicationResourceController {
         ScreenModel screenModel = screenRegistry.get(viewName);
         if (viewName.equals("ingredients")) {
             StringBuilder builder = new StringBuilder();
-            new ContainerBuilder(new RowBuilder(new ButtonBarBuilder(
-                    new ButtonBuilder("Ajouter", "ingredientListCtrl.addIngredient()", true),
-                    new ButtonBuilder("Modifier", "ingredientListCtrl.editIngredient()",
-                            "ingredientListCtrl.selectedIngredient === null", true),
-                    new ButtonBuilder("Supprimer", "ingredientListCtrl.deleteIngredient()",
-                            "ingredientListCtrl.selectedIngredient === null", true)
-                    ))).build(builder);
+            new ContainerBuilder(
+                    new RowBuilder(new ButtonBarBuilder(
+                            new ButtonBuilder("Ajouter").onClick("ingredientListCtrl.addIngredient()"),
+                            new ButtonBuilder("Modifier").onClick("ingredientListCtrl.editIngredient()")
+                                    .disabled("ingredientListCtrl.selectedIngredient === null"),
+                            new ButtonBuilder("Supprimer").onClick("ingredientListCtrl.deleteIngredient()")
+                                    .disabled("ingredientListCtrl.selectedIngredient === null")
+                            )),
+                    new RowBuilder(new TableBuilder(
+                            "ingredient in ingredientListCtrl.ingredients",
+                            new TableColumnBuilder("Nom", "ingredient.name"),
+                            new TableColumnBuilder("Unité", "ingredient.unite"),
+                            new TableColumnBuilder("Taux Alcool", "ingredient.tauxAlcool"),
+                            new TableColumnBuilder("Origine", "ingredient.origine"),
+                            new TableColumnBuilder("Coût Unitaire (€)", "ingredient.coutUnitaire"))
+                            .onClick("ingredientListCtrl.selectIngredient(ingredient)")
+                            .cssClass("{info: ingredient === ingredientListCtrl.selectedIngredient}")),
+                    new ModalBuilder("IngredientModalContent.html")
+                            .title("{{ingredientEditCtrl.title}}")
+                            .footer(new ButtonBuilder("OK")
+                                    .onClick("ingredientEditCtrl.ok()").type(ButtonType.PRIMARY),
+                                    new ButtonBuilder("Cancel")
+                                            .onClick("ingredientEditCtrl.cancel()").type(ButtonType.WARNING)))
+                    .build(builder);
             return builder.toString();
         } else {
             return "<div class=\"container\">Hello view " + viewName + "!</div>";
